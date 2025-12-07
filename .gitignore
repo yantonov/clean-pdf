@@ -1,0 +1,2 @@
+# do not put tools under version control
+/lib/*.py
