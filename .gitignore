@@ -1,2 +1,3 @@
 # do not put tools under version control
-/lib/*.py
+/lib/pdfid.py
+/lib/pdf-parser.py
