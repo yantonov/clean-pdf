@@ -2,8 +2,20 @@
 # -------------------------------
 # Script: clean_pdf_dir
 # Usage: clean_pdf_dir /path/to/directory
-# Works on macOS and Linux
+# Works on macOS, Linux, and Windows
 # -------------------------------
+
+# Detect GhostScript command based on OS
+if command -v gswin64c.exe >/dev/null 2>&1; then
+    GS_CMD="gswin64c.exe"
+elif command -v gswin32c.exe >/dev/null 2>&1; then
+    GS_CMD="gswin32c.exe"
+elif command -v gs >/dev/null 2>&1; then
+    GS_CMD="gs"
+else
+    echo "Error: GhostScript not found. Please install GhostScript."
+    exit 1
+fi
 
 # Check input
 if [ $# -ne 1 ]; then
@@ -34,7 +46,7 @@ for INPUT in "$DIR"/*.pdf; do
     OUTPUT="$CLEANED_DIR/${INPUT_FILE%.pdf}.pdf"
 
     # Run Ghostscript
-    gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress \
+    "$GS_CMD" -dSAFER -dBATCH -dNOPAUSE -sDEVICE=pdfwrite -dPDFSETTINGS=//prepress \
        -sOutputFile="$OUTPUT" "$INPUT"
 
     if [ -f "$OUTPUT" ]; then
