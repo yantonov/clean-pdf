@@ -36,6 +36,16 @@ fi
 CLEANED_DIR="$DIR/cleaned"
 mkdir -p "$CLEANED_DIR"
 
+# Determine stats.sh path
+SCRIPT_DIR=$(dirname "$0")
+STATS_SCRIPT="$SCRIPT_DIR/stats.sh"
+
+# Check if stats.sh exists
+if [ ! -f "$STATS_SCRIPT" ]; then
+    echo "Error: stats.sh not found at $STATS_SCRIPT"
+    exit 1
+fi
+
 # Process PDFs
 for INPUT in "$DIR"/*.pdf; do
     [ -e "$INPUT" ] || { echo "No PDF files found in $DIR"; exit 0; }
@@ -43,18 +53,39 @@ for INPUT in "$DIR"/*.pdf; do
     INPUT_FILE=$(basename "$INPUT")
     OUTPUT="$CLEANED_DIR/${INPUT_FILE%.pdf}.pdf"
 
-    "$GS_CMD" \
-        -dSAFER \
-        -dBATCH \
-        -dNOPAUSE \
-        -sDEVICE=pdfwrite \
-        -dPDFSETTINGS="$PDFSETTINGS" \
-        -sOutputFile="$OUTPUT" \
-        "$INPUT"
+    echo "Processing: $INPUT_FILE"
 
-    if [ -f "$OUTPUT" ]; then
-        echo "Cleaned PDF saved as: $OUTPUT"
+    # Check for dangerous content using stats.sh
+    "$STATS_SCRIPT" "$INPUT" > /dev/null 2>&1
+    STATS_EXIT_CODE=$?
+
+    if [ $STATS_EXIT_CODE -eq 0 ]; then
+        # Clean file - just copy it
+        echo "  [OK] No dangerous content detected - copying file"
+        cp "$INPUT" "$OUTPUT"
+        if [ -f "$OUTPUT" ]; then
+            echo "  Copied to: $OUTPUT"
+        else
+            echo "  Failed to copy: $INPUT"
+        fi
     else
-        echo "Failed to sanitize: $INPUT"
+        # Dangerous content detected - process with Ghostscript
+        echo "  [WARN] Potentially dangerous content detected - cleaning with Ghostscript"
+
+        "$GS_CMD" \
+            -dSAFER \
+            -dBATCH \
+            -dNOPAUSE \
+            -sDEVICE=pdfwrite \
+            -dPDFSETTINGS="$PDFSETTINGS" \
+            -sOutputFile="$OUTPUT" \
+            "$INPUT"
+
+        if [ -f "$OUTPUT" ]; then
+            echo "  Cleaned PDF saved as: $OUTPUT"
+        else
+            echo "  Failed to sanitize: $INPUT"
+        fi
     fi
+    echo
 done

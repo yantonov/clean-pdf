@@ -48,19 +48,49 @@ ABS_INPUT="$ABS_DIR/$INPUT_FILE"
 # Output file
 OUTPUT="$ABS_DIR/${INPUT_FILE%.pdf}_cleaned.pdf"
 
-# Run Ghostscript
-"$GS_CMD" \
-    -dSAFER \
-    -dBATCH \
-    -dNOPAUSE \
-    -sDEVICE=pdfwrite \
-    -dPDFSETTINGS="$PDFSETTINGS" \
-    -sOutputFile="$OUTPUT" \
-    "$ABS_INPUT"
+# Determine stats.sh path
+SCRIPT_DIR=$(dirname "$0")
+STATS_SCRIPT="$SCRIPT_DIR/stats.sh"
 
-if [ -f "$OUTPUT" ]; then
-    echo "Cleaned PDF saved as: $OUTPUT"
-else
-    echo "Failed to sanitize: $INPUT"
+# Check if stats.sh exists
+if [ ! -f "$STATS_SCRIPT" ]; then
+    echo "Error: stats.sh not found at $STATS_SCRIPT"
     exit 1
+fi
+
+echo "Processing: $INPUT_FILE"
+
+# Check for dangerous content using stats.sh
+"$STATS_SCRIPT" "$ABS_INPUT" > /dev/null 2>&1
+STATS_EXIT_CODE=$?
+
+if [ $STATS_EXIT_CODE -eq 0 ]; then
+    # Clean file - just copy it
+    echo "  [OK] No dangerous content detected - copying file"
+    cp "$ABS_INPUT" "$OUTPUT"
+    if [ -f "$OUTPUT" ]; then
+        echo "  Copied to: $OUTPUT"
+    else
+        echo "  Failed to copy: $INPUT"
+        exit 1
+    fi
+else
+    # Dangerous content detected - process with Ghostscript
+    echo "  [WARN] Potentially dangerous content detected - cleaning with Ghostscript"
+
+    "$GS_CMD" \
+        -dSAFER \
+        -dBATCH \
+        -dNOPAUSE \
+        -sDEVICE=pdfwrite \
+        -dPDFSETTINGS="$PDFSETTINGS" \
+        -sOutputFile="$OUTPUT" \
+        "$ABS_INPUT"
+
+    if [ -f "$OUTPUT" ]; then
+        echo "  Cleaned PDF saved as: $OUTPUT"
+    else
+        echo "  Failed to sanitize: $INPUT"
+        exit 1
+    fi
 fi
