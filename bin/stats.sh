@@ -42,10 +42,31 @@ fi
 echo "Checking PDF for executable content: $ABS_INPUT"
 echo "------------------------------------------------"
 
-# Run PDFiD using Python
-python3 "$PDFID_PATH" "$ABS_INPUT"
+# Run PDFiD using Python and capture output
+PDFID_OUTPUT=$(python3 "$PDFID_PATH" "$ABS_INPUT")
+
+# Display full output
+echo "$PDFID_OUTPUT"
 
 # Highlight potential executable tags
 echo
 echo "Summary of potential executable content:"
-python3 "$PDFID_PATH" "$ABS_INPUT" | grep -E '(/JavaScript|/JS|/AA|/Launch|/EmbeddedFile)'
+DANGEROUS_CONTENT=$(echo "$PDFID_OUTPUT" | grep -E '(/JavaScript|/JS|/AA|/Launch|/EmbeddedFile)')
+echo "$DANGEROUS_CONTENT"
+
+# Check if any dangerous content exists (count > 0)
+DANGER_COUNT=0
+if [ -n "$DANGEROUS_CONTENT" ]; then
+    # Extract counts from the dangerous content lines and sum them
+    DANGER_COUNT=$(echo "$DANGEROUS_CONTENT" | awk '{sum += $2} END {print sum}')
+fi
+
+# Return appropriate message and exit code
+echo
+if [ "$DANGER_COUNT" -gt 0 ]; then
+    echo "[WARN] potentially dangerous content"
+    exit 1
+else
+    echo "[OK]"
+    exit 0
+fi
