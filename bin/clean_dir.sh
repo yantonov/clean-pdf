@@ -32,9 +32,9 @@ if [ ! -d "$DIR" ]; then
     exit 1
 fi
 
-# Create cleaned directory
-CLEANED_DIR="$DIR/cleaned"
-mkdir -p "$CLEANED_DIR"
+# Create output directory
+OUTPUT_DIR="$DIR/output"
+mkdir -p "$OUTPUT_DIR"
 
 # Determine stats.sh path
 SCRIPT_DIR=$(dirname "$0")
@@ -51,7 +51,7 @@ for INPUT in "$DIR"/*.pdf; do
     [ -e "$INPUT" ] || { echo "No PDF files found in $DIR"; exit 0; }
 
     INPUT_FILE=$(basename "$INPUT")
-    OUTPUT="$CLEANED_DIR/${INPUT_FILE%.pdf}.pdf"
+    OUTPUT="$OUTPUT_DIR/${INPUT_FILE%.pdf}.pdf"
 
     echo "Processing: $INPUT_FILE"
 
