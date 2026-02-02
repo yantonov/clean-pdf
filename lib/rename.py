@@ -22,20 +22,24 @@ def transliterate_cyrillic(text):
             result.append(CYRILLIC_TO_LATIN[char])
         elif ord(char) < 128:  # ASCII character
             result.append(char)
-        # else: ignore non-ASCII non-Cyrillic characters
+            # else: ignore non-ASCII non-Cyrillic characters
     return ''.join(result)
 
 def clean_filename(filename):
     # Transliterate Cyrillic and remove non-ASCII
     filename = transliterate_cyrillic(filename)
-    # Remove sequences in (), {}, []
-    filename = re.sub(r'\[.*?\]|\(.*?\)|\{.*?\}', '', filename)
+    # Remove invalid chars
+    filename = re.sub(r'[^a-zA-Z0-9 _.-]', '_', filename)
     # Replace spaces with underscores
     filename = filename.replace(' ', '_')
+    # Replace minus with underscores
+    filename = filename.replace('-', '_')
     # Remove consecutive underscores
     filename = re.sub(r'_+', '_', filename)
     # Strip leading/trailing underscores or dots
     filename = filename.strip('_').strip('.')
+    # lowercase
+    filename = filename.lower()
     return filename
 
 def rename_files_in_directory(directory):
@@ -59,7 +63,7 @@ def rename_files_in_directory(directory):
 
             if old_path != new_path:
                 if os.path.exists(new_path):
-                    print(f"[SKIP] {item} (target exists)")
+                    print(f"[SKIP] {item} (target exists) old_path={old_path} new_path={new_path}")
                 else:
                     os.rename(old_path, new_path)
                     print(f"[RENAMED] {item} -> {new_name}")
