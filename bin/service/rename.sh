@@ -1,8 +1,8 @@
 #!/bin/bash
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$(dirname "$0")/../../lib"
 
-PYTHON_SCRIPT="$SCRIPT_DIR/../lib/rename.py"
+PYTHON_SCRIPT="rename.py"
 
 DIR="$1"
 if [ -z "${DIR}" ]; then

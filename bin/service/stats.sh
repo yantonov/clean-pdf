@@ -31,7 +31,7 @@ ABS_INPUT="$ABS_DIR/$INPUT_FILE"
 # Determine script directory
 SCRIPT_DIR=$(dirname "$0")
 # Assume lib is sibling of bin
-PDFID_PATH="$SCRIPT_DIR/../lib/pdfid.py"
+PDFID_PATH="$SCRIPT_DIR/../../lib/pdfid.py"
 
 # Check if PDFiD exists
 if [ ! -f "$PDFID_PATH" ]; then

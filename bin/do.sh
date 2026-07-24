@@ -3,8 +3,8 @@ set -o errexit -o nounset
 
 cd "$(dirname "$0")"
 
-./convert.sh
+./service/convert.sh
 
-./cleanup.sh
+./service/cleanup.sh
 
-./rename.sh
+./service/rename.sh

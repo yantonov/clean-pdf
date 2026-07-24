@@ -3,7 +3,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-INSTALL_DIR="$SCRIPT_DIR/../lib"
+INSTALL_DIR="$SCRIPT_DIR/../../lib"
 
 echo "Installing pdfid and pdf-parser into $INSTALL_DIR ..."
 

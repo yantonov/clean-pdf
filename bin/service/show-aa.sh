@@ -18,7 +18,7 @@ if [ ! -f "$PDF_FILE" ]; then
 fi
 
 # Path to pdf-parser.py relative to this script
-PDF_PARSER="$(dirname "$0")/../lib/pdf-parser.py"
+PDF_PARSER="$(dirname "$0")/../../lib/pdf-parser.py"
 
 if [ ! -f "$PDF_PARSER" ]; then
     echo "Error: pdf-parser.py not found at '$PDF_PARSER'"
@@ -26,5 +26,5 @@ if [ ! -f "$PDF_PARSER" ]; then
 fi
 
 # Run pdf-parser
-python3 "$PDF_PARSER" -s /JS "$PDF_FILE"
+python3 "$PDF_PARSER" -s /AA "$PDF_FILE"
 
